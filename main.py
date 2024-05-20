@@ -96,6 +96,8 @@ def main() -> None:
     if TELEGRAM_BOT_TOKEN is None:
         logger.error("No TELEGRAM_BOT_TOKEN set in environment variables.")
         return
+    
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     # Handlers go here
     conv_handler = ConversationHandler(
