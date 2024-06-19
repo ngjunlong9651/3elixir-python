@@ -22,7 +22,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Conversation states
-START_ROUTES, CATALOG, ORDERS, ORDER_OPTIONS = range(4)
+START_ROUTES, CATALOG, ORDERS,  ORDER_OPTIONS = range(4)
 
 
 # Function to handle the /start command
@@ -51,8 +51,7 @@ async def catalog(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(
-        """Hey there, you have selected to register! 🎉🎉 \n\nFollow these stepsto get registered immediately!\n\nStep 1️⃣: Copy the telegram user id(example. ID: 268480103) \n\nStep 2️⃣: Go to strapi backend
-        Create a new authenticated user with the telegram user id as both the username and password"""
+        """Hey there, you have selected to register! 🎉🎉 \n\nFollow these stepsto get registered immediately!\n\nStep 1️⃣: Copy the telegram user id(example. ID: 268480103) \n\nStep 2️⃣: Go to strapi backend Create a new authenticated user with the telegram user id as both the username and password"""
         )
     print(update.effective_user)
     
