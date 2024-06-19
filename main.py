@@ -49,7 +49,12 @@ async def catalog(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     return CATALOG
 
-
+async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text(
+        """Hey there, you have selected to register! 🎉🎉"""
+        )
+    print(update.effective_user)
+    
 # Function to generate the inline keyboard for initial path selection
 def path_keyboard() -> InlineKeyboardMarkup:
     keyboard = [
