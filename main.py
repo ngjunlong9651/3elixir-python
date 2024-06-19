@@ -50,8 +50,9 @@ async def catalog(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return CATALOG
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id = update.effective_user.id
     await update.message.reply_text(
-        """Hey there, you have selected to register! 🎉🎉 \n\nFollow these steps to get registered immediately!\n\nStep 1️⃣: Copy the telegram user id(example. ID: 268480103) \n\nStep 2️⃣: Go to strapi backend Create a new authenticated user with the telegram user id as both the username and password"""
+        f"""Hey there, you have selected to register! 🎉🎉 \n\nFollow these steps to get registered immediately!\n\nStep 1️⃣: Copy your telegram {{user_id}} \n\nStep 2️⃣: Go to strapi backend Create a new authenticated user with the telegram user id as both the username and password"""
         )
     print(update.effective_user)
     
