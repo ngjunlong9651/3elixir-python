@@ -1,19 +1,24 @@
 import requests
 import os
-import logging
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
+
 # Load environment variables
 load_dotenv()
 
-
-def get_orders():
-    prod_url = os.getenv("PROD_URL")
-    endpoint = f"{prod_url}/api/orders"
+def main():
+    prod_url = os.environ.get("PROD_URL")
+    if prod_url is None:
+        print("Error: PROD_URL is not set in the environment variables.")
+        return
     
+    endpoint = f"{prod_url}/api/orders"
+        
     # Define the parameters
     params = {
-        'sort[0]': 'fulfilmentEnd:asc'
+        'sort[0]': 'fulfilmentEnd:asc',
     }
+    current_time = datetime.utcnow()
     
     # Optionally, add headers if required by the API
     headers = {
@@ -26,9 +31,21 @@ def get_orders():
         response = requests.get(endpoint, headers=headers, params=params)
         response.raise_for_status()  # Raises an HTTPError for bad responses
         data = response.json()  # Parse the JSON response
-        print(data)  # Process the data as needed
+        orders = data.get('data', [])  # Extract orders from 'data' field
+        
+        upcoming_orders = [
+            order for order in orders
+            if 'fulfilmentEnd' in order['attributes'] and datetime.strptime(order['attributes']['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ') < current_time + timedelta(hours=48)
+        ]
+        
+        for order in upcoming_orders:
+            attributes = order['attributes']
+            print(f"Order ID: {order['id']}, Fulfilment End: {attributes['fulfilmentEnd']}")
     except requests.exceptions.RequestException as e:
         print(f"Error during API call: {e}")
+    except KeyError as e:
+        print(f"KeyError: {e}")
 
 # Call the function to test it
-get_orders()
+if __name__ == "__main__":
+    main()
