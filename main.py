@@ -76,12 +76,21 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         if due_today_orders:
             order_message = "📋 Orders due today:\n\n"
             for order in due_today_orders:
+                attributes = order['attributes']
                 order_message += f"Order ID: {order['id']}\n"
-                order_message += f"Products: {order}\n"
-                # order_message += f"Customer Name: {order['attributes']['customerName']}\n"
-                # order_message += f"Delivery Address: {order['attributes']['deliveryAddress']}\n"
-                # order_message += f"Contact Number: {order['attributes']['contactNumber']}\n"
-                # order_message += f"Remarks: {order['attributes']['remarks']}\n\n"
+                order_message += f"Customer Name: {attributes['customerName']}\n"
+                order_message += f"Delivery Address: {attributes['customerAddress']}\n"
+                order_message += f"Contact Number: {attributes['customerContact']}\n"
+                order_message += "Products:\n"
+                for product in attributes['orderProducts']:
+                    order_message += (
+                        f"  - {product['name']} (SKU: {product['sku']}, "
+                        f"Brand: {product['brand']}, "
+                        f"Category: {product['category']}, "
+                        f"Quantity: {product['quantity']}, "
+                        f"Price: ${product['price']})\n"
+                    )
+                order_message += f"Remarks: {attributes['remarks']}\n\n"
             await update.message.reply_text(order_message)
         else:
             await update.message.reply_text("No orders due today.")
