@@ -9,6 +9,10 @@ from telegram.ext import (
     ContextTypes,
     ConversationHandler,
 )
+from datetime import datetime
+import requests
+
+
 
 # Load environment variables
 load_dotenv()
@@ -48,6 +52,43 @@ async def catalog(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         reply_markup=catalog_management_keyboard(),
     )
     return CATALOG
+
+async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    try:
+        today = datetime.now().date()
+        prod_url = os.environ.get("PROD_URL")
+        
+        if not prod_url:
+            logger.error("Prod URL is not set in the environment variables.")
+            await update.message.reply_text("PROD_URL is not set in the environment variables.")
+            return
+        
+        response = requests.get(f"{prod_url}/api/orders", headers={
+            'Authorization': f"Bearer {os.getenv('API_TOKEN')}"
+        })
+        response.raise_for_status()
+        orders = response.json().get('data', [])
+        
+        due_today_orders = [
+            order for order in orders
+            if datetime.strptime(order['attributes']['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ').date() == today
+        ]
+        
+        if due_today_orders:
+            order_message = "📋 Orders due today:\n\n"
+            for order in due_today_orders:
+                order_message += f"Order ID: {order['id']}\n"
+                order_message += f"Products: {order['attributes']['products']}\n"
+                order_message += f"Customer Name: {order['attributes']['customerName']}\n"
+                order_message += f"Delivery Address: {order['attributes']['deliveryAddress']}\n"
+                order_message += f"Contact Number: {order['attributes']['contactNumber']}\n"
+                order_message += f"Remarks: {order['attributes']['remarks']}\n\n"
+                
+                
+        
+        await update.message.reply_text(
+            "👋👋 Hey there, these are the orders that are due today")
+        
 
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.effective_user.id  
@@ -162,6 +203,7 @@ def main() -> None:
             CommandHandler("orders", orders),
             CommandHandler("catalog", catalog),
             CommandHandler("register", register),
+            CommandHandler("reminder", reminder),
         ],
         states={
             START_ROUTES: [
@@ -186,6 +228,7 @@ def main() -> None:
             CommandHandler("orders", orders),
             CommandHandler("catalog", catalog),
             CommandHandler("register", register),
+            CommandHandler("reminder", reminder),
         ],
     )
 
