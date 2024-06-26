@@ -83,13 +83,16 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 order_message += f"Delivery Address: {order['attributes']['deliveryAddress']}\n"
                 order_message += f"Contact Number: {order['attributes']['contactNumber']}\n"
                 order_message += f"Remarks: {order['attributes']['remarks']}\n\n"
+            await update.message.reply_text(order_message)
+        else:
+            await update.message.reply_text("No orders due today.")
+    except Exception as e:
+        logger.error(f"Error fetching orders: {e}")
+        await update.message.reply_text("An error occurred while fetching orders.")
+    
+    return START_ROUTES
                 
-                
-        
-        await update.message.reply_text(
-            "👋👋 Hey there, these are the orders that are due today")
-        
-
+            
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.effective_user.id  
     await update.message.reply_text(
