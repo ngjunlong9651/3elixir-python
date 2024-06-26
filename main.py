@@ -57,8 +57,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         today = datetime.now().date()
         prod_url = os.environ.get("PROD_URL")
-        
-        if not prod_url:
+        if prod_url is None:
             logger.error("Prod URL is not set in the environment variables.")
             await update.message.reply_text("PROD_URL is not set in the environment variables.")
             return
@@ -78,11 +77,11 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             order_message = "📋 Orders due today:\n\n"
             for order in due_today_orders:
                 order_message += f"Order ID: {order['id']}\n"
-                order_message += f"Products: {order['attributes']['products']}\n"
-                order_message += f"Customer Name: {order['attributes']['customerName']}\n"
-                order_message += f"Delivery Address: {order['attributes']['deliveryAddress']}\n"
-                order_message += f"Contact Number: {order['attributes']['contactNumber']}\n"
-                order_message += f"Remarks: {order['attributes']['remarks']}\n\n"
+                # order_message += f"Products: {order['attributes']['products']}\n"
+                # order_message += f"Customer Name: {order['attributes']['customerName']}\n"
+                # order_message += f"Delivery Address: {order['attributes']['deliveryAddress']}\n"
+                # order_message += f"Contact Number: {order['attributes']['contactNumber']}\n"
+                # order_message += f"Remarks: {order['attributes']['remarks']}\n\n"
             await update.message.reply_text(order_message)
         else:
             await update.message.reply_text("No orders due today.")
