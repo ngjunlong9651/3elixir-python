@@ -67,6 +67,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         })
         response.raise_for_status()
         orders = response.json().get('data', [])
+        print(orders)
         
         due_today_orders = [
             order for order in orders
