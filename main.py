@@ -74,7 +74,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 datetime.strptime(order['attributes']['fulfilmentStart'], "%Y-%m-%dT%H:%M:%S.%fZ").date() <= today <= datetime.strptime(order['attributes'].get('fulfilmentEnd', '2099-12-31T23:59:59.999Z'), "%Y-%m-%dT%H:%M:%S.%fZ").date()
                 or datetime.strptime(order['attributes']['fulfilmentStart'], "%Y-%m-%dT%H:%M:%S.%fZ").date() <= today
             ) 
-            # and order['attributes']['order_status'] != 'Completed'
+            and order['attributes']['order_status']['data']['attributes']['orderStatus'] != 3
         ]
 
          
