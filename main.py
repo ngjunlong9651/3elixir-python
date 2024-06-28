@@ -62,7 +62,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             await update.message.reply_text("PROD_URL is not set in the environment variables.")
             return
         
-        response = requests.get(f"{prod_url}/api/orders", headers={
+        response = requests.get(f"{prod_url}/api/orders/?populate=*", headers={
             'Authorization': f"Bearer {os.getenv('API_TOKEN')}"
         })
         response.raise_for_status()
