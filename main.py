@@ -69,12 +69,18 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         orders = response.json().get('data', [])
         print(orders)
         
-        due_today_orders = [
+        yet_to_complete_orders = [
             order for order in orders
+            if order['attributes']['order_status']['data']['attributes']['orderStatus'] != 'Completed'
+            or order['attributes']['order_status']['data']['attributes']['orderStatus'] != 'Cancelled'
+        ]
+        
+        due_today_orders = [
+            order for order in yet_to_complete_orders
             if (
                 datetime.strptime(order['attributes']['fulfilmentStart'], "%Y-%m-%dT%H:%M:%S.%fZ").date() <= today <= 
                 (datetime.strptime(order['attributes'].get('fulfilmentEnd', '2099-12-31T23:59:59.999Z'), "%Y-%m-%dT%H:%M:%S.%fZ").date())
-            ) and order['attributes']['order_status']['data']['attributes']['orderStatus'] != 'Completed'
+            )
         ]
 
          
