@@ -95,6 +95,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 order_message += f"Order ID: {order['id']}\n"
                 order_message += f"Fulfilment Start: order['attributes']['fulfilmentStart']\n"
                 order_message += f"Fulfilment End: order['attributes']['fulfilmentEnd']\n"
+                order_message += f"Order Status: {attributes['order_status']['data']['attributes']['orderStatus']}\n"
                 order_message += f"Customer Name: {attributes['customerName']}\n"
                 order_message += f"Delivery Address: {attributes['customerAddress']}\n"
                 order_message += f"Contact Number: {attributes['customerContact']}\n"
