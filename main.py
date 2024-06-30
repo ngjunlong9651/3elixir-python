@@ -89,12 +89,12 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
          
         if due_today_orders:
-            order_message = "📋 Orders due today:\n\n"
+            order_message = f"📋 Orders due today: {today} \n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
                 order_message += f"Order ID: {order['id']}\n"
-                order_message += f"Fulfilment Start: {order['attributes']['fulfilmentStart']}\n"
-                order_message += f"Fulfilment End: {order['attributes']['fulfilmentEnd']}\n"
+                order_message += f"Fulfilment Start: {datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
+                order_message += f"Fulfilment End: {datetime.strptime(attributes['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
                 order_message += f"Order Status: {attributes['order_status']['data']['attributes']['orderStatus']}\n"
                 order_message += f"Customer Name: {attributes['customerName']}\n"
                 order_message += f"Delivery Address: {attributes['customerAddress']}\n"
