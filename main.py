@@ -75,29 +75,26 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         active_orders = [
             order for order in orders
-            if order['attributes']['order_status']['data']['attributes']['orderStatus'] not in ['Completed' , 'Cancelled']
+            if order['attributes']['order_status']['data']['attributes']['orderStatus'] not in ['Completed', 'Cancelled']
         ]
         
         due_today_orders = [
             order for order in active_orders
             if (
                 datetime.strptime(order['attributes']['fulfilmentStart'], "%Y-%m-%dT%H:%M:%S.%fZ").date() <= today <= 
-                (datetime.strptime(order['attributes']['fulfilmentEnd'], "%Y-%m-%dT%H:%M:%S.%fZ").date())
+                datetime.strptime(order['attributes']['fulfilmentEnd'], "%Y-%m-%dT%H:%M:%S.%fZ").date()
             ) 
         ]
-
          
         if due_today_orders:
-            order_message = f"📋 Orders due today: {today} \n\n"
+            order_message = f"*📋 Orders due today: {today}*\n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
-                order_message += f"*Order ID:* {order['id']}\n"
-                # order_message += f"Fulfilment Start: {datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
-                # order_message += f"Fulfilment End: {datetime.strptime(attributes['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
-                order_message += f"*Order Status:* {attributes['order_status']['data']['attributes']['orderStatus']}\n"
-                order_message += f"*Customer Name:* {attributes['customerName']}\n"
-                order_message += f"*Delivery Address:* {attributes['customerAddress']}\n"
-                order_message += f"*Contact Number:* {attributes['customerContact']}\n"
+                order_message += f"*Order ID:* `{order['id']}`\n"
+                order_message += f"*Order Status:* `{attributes['order_status']['data']['attributes']['orderStatus']}`\n"
+                order_message += f"*Customer Name:* `{attributes['customerName']}`\n"
+                order_message += f"*Delivery Address:* `{attributes['customerAddress']}`\n"
+                order_message += f"*Contact Number:* `{attributes['customerContact']}`\n"
                 order_message += "*Products:*\n"
                 for product in attributes['orderProducts']:
                     order_message += (
@@ -116,6 +113,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text("An error occurred while fetching orders.")
     
     return START_ROUTES
+
                 
             
 async def register(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
