@@ -78,7 +78,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         if due_today_orders:
             # today = today.replace('-', '\\-')
             print(today)
-            order_message = f"📋 Orders due today: {today} \n\n"
+            order_message = f"<b>📋 Orders due today: {today}</b> \n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
                 order_message += f"Order ID: {order['id']}\n"
@@ -96,7 +96,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                         f"Price: ${product['price']})\n"
                     )
                 order_message += f"Remarks: {attributes['remarks']}\n\n"
-            await update.message.reply_text(order_message)
+            await update.message.reply_text(order_message, parse_mode=ParseMode.HTML)
         else:
             await update.message.reply_text("No orders due today.")
             
