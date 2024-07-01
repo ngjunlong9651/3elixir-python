@@ -50,22 +50,23 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             logger.error("Prod URL is not set in the environment variables.")
             await update.message.reply_text("PROD_URL is not set in the environment variables.")
             return
-
+        
         response = requests.get(f"{prod_url}/api/orders/?populate=*", headers={
             'Authorization': f"Bearer {os.getenv('API_TOKEN')}"
         })
         response.raise_for_status()
         orders = response.json().get('data', [])
+        print(orders)
         
         for order in orders:
             if order['attributes']['fulfilmentEnd'] is None:
-                order['attributes']['fulfilmentEnd'] = order['attributes']['fulfilmentStart']
-
+                order['attributes']['fulfilmentEnd'] = '2099-12-31T23:59:59.999Z'
+        
         active_orders = [
             order for order in orders
-            if order['attributes']['order_status']['data']['attributes']['orderStatus'] not in ['Completed', 'Cancelled']
+            if order['attributes']['order_status']['data']['attributes']['orderStatus'] not in ['Completed' , 'Cancelled']
         ]
-
+        
         due_today_orders = [
             order for order in active_orders
             if (
@@ -74,27 +75,29 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ) 
         ]
 
+         
         if due_today_orders:
-            order_message = f"📋 Orders due today: {today}\n\n"
+            order_message = f"📋 Orders due today: {today} \n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
-                order_message += f"Order ID: `{order['id']}`\n"
-                # order_message += f"*Order Status:* `{attributes['order_status']['data']['attributes']['orderStatus']}`\n"
-                # order_message += f"*Customer Name:* `{attributes['customerName']}`\n"
-                # order_message += f"*Delivery Address:* `{attributes['customerAddress']}`\n"
-                # order_message += f"*Contact Number:* `{attributes['customerContact']}`\n"
-                order_message += "*Products:*\n"
-                # for product in attributes['orderProducts']:
-                #     product_name = product['name'].replace("-", r"\-")
-                #     order_message += (
-                #         f"  \- *{product_name}* \(SKU: `{product['sku']}`, "
-                #         f"Brand: `{product['brand']}`, "
-                #         f"Category: `{product['category']}`, "
-                #         f"Quantity: `{product['quantity']}`, "
-                #         f"Price: `${product['price']}`\)\n"
-                #     )
-                # order_message += f"*Remarks:* `{attributes['remarks']}`\n\n"
-            await update.message.reply_text(order_message, parse_mode=ParseMode.MARKDOWN_V2)
+                order_message += f"Order ID: {order['id']}\n"
+                order_message += f"Fulfilment Start: {datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
+                order_message += f"Fulfilment End: {datetime.strptime(attributes['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
+                order_message += f"Order Status: {attributes['order_status']['data']['attributes']['orderStatus']}\n"
+                order_message += f"Customer Name: {attributes['customerName']}\n"
+                order_message += f"Delivery Address: {attributes['customerAddress']}\n"
+                order_message += f"Contact Number: {attributes['customerContact']}\n"
+                order_message += "Products:\n"
+                for product in attributes['orderProducts']:
+                    order_message += (
+                        f"  - {product['name']} (SKU: {product['sku']}, "
+                        f"Brand: {product['brand']}, "
+                        f"Category: {product['category']}, "
+                        f"Quantity: {product['quantity']}, "
+                        f"Price: ${product['price']})\n"
+                    )
+                order_message += f"Remarks: {attributes['remarks']}\n\n"
+            await update.message.reply_text(order_message)
         else:
             await update.message.reply_text("No orders due today.")
     except Exception as e:
