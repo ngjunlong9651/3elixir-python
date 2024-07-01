@@ -84,16 +84,16 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 order_message += f"*Delivery Address:* `{attributes['customerAddress']}`\n"
                 order_message += f"*Contact Number:* `{attributes['customerContact']}`\n"
                 order_message += "*Products:*\n"
-                for product in attributes['orderProducts']:
-                    product_name = product['name'].replace("-", r"\-")
-                    order_message += (
-                        f"  \- *{product_name}* \(SKU: `{product['sku']}`, "
-                        f"Brand: `{product['brand']}`, "
-                        f"Category: `{product['category']}`, "
-                        f"Quantity: `{product['quantity']}`, "
-                        f"Price: `${product['price']}`\)\n"
-                    )
-                order_message += f"*Remarks:* `{attributes['remarks']}`\n\n"
+                # for product in attributes['orderProducts']:
+                #     product_name = product['name'].replace("-", r"\-")
+                #     order_message += (
+                #         f"  \- *{product_name}* \(SKU: `{product['sku']}`, "
+                #         f"Brand: `{product['brand']}`, "
+                #         f"Category: `{product['category']}`, "
+                #         f"Quantity: `{product['quantity']}`, "
+                #         f"Price: `${product['price']}`\)\n"
+                #     )
+                # order_message += f"*Remarks:* `{attributes['remarks']}`\n\n"
             await update.message.reply_text(order_message, parse_mode=ParseMode.MARKDOWN_V2)
         else:
             await update.message.reply_text("No orders due today.")
