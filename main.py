@@ -98,11 +98,11 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 order_message += "*Products:*\n"
                 for product in attributes['orderProducts']:
                     order_message += (
-                        f"  \\- *{product['name']}* \(SKU: `{product['sku']}`, "
-                        f"Brand: `{product['brand']}`, "
-                        f"Category: `{product['category']}`, "
-                        f"Quantity: `{product['quantity']}`, "
-                        f"Price: `${product['price']}`\)\n"
+                        f"  - {product['name']} (SKU: {product['sku']}, "
+                        f"Brand: {product['brand']}, "
+                        f"Category: {product['category']}, "
+                        f"Quantity: {product['quantity']}, "
+                        f"Price: ${product['price']})\n"
                     )
                 order_message += f"*Remarks:* `{attributes['remarks']}`\n\n"
             await update.message.reply_text(order_message, parse_mode='MarkdownV2')
