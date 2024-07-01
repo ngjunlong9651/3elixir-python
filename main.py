@@ -76,6 +76,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ]
 
         if due_today_orders:
+            today = today.replace('-', '\\-')
             order_message = f"*📋 Orders due today: {today}* \n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
