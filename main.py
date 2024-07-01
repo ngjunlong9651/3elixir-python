@@ -75,14 +75,14 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ]
 
         if due_today_orders:
-            order_message = f"*📋 Orders due today: {today}*\n\n"
+            order_message = f"📋 Orders due today: {today}\n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
-                order_message += f"*Order ID:* `{order['id']}`\n"
-                order_message += f"*Order Status:* `{attributes['order_status']['data']['attributes']['orderStatus']}`\n"
-                order_message += f"*Customer Name:* `{attributes['customerName']}`\n"
-                order_message += f"*Delivery Address:* `{attributes['customerAddress']}`\n"
-                order_message += f"*Contact Number:* `{attributes['customerContact']}`\n"
+                order_message += f"Order ID: `{order['id']}`\n"
+                # order_message += f"*Order Status:* `{attributes['order_status']['data']['attributes']['orderStatus']}`\n"
+                # order_message += f"*Customer Name:* `{attributes['customerName']}`\n"
+                # order_message += f"*Delivery Address:* `{attributes['customerAddress']}`\n"
+                # order_message += f"*Contact Number:* `{attributes['customerContact']}`\n"
                 order_message += "*Products:*\n"
                 # for product in attributes['orderProducts']:
                 #     product_name = product['name'].replace("-", r"\-")
