@@ -108,6 +108,8 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                     )
                 order_message += f"*Remarks:* `{attributes['remarks']}`\n\n"
             await update.message.reply_text(order_message, parse_mode=ParseMode.MARKDOWN_V2)
+            ## hopefully this fixes it
+            
         else:
             await update.message.reply_text("No orders due today.")
     except Exception as e:
