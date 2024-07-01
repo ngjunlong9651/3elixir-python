@@ -98,11 +98,11 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 order_message += "*Products:*\n"
                 for product in attributes['orderProducts']:
                     order_message += (
-                        f"  - {product['name']} (SKU: {product['sku']}, "
+                        f"  \\- {product['name']} (SKU: {product['sku']}, "
                         f"Brand: {product['brand']}, "
                         f"Category: {product['category']}, "
                         f"Quantity: {product['quantity']}, "
-                        f"Price: ${product['price']})\n"
+                        f"Price: \\${product['price']})\n"
                     )
                 order_message += f"*Remarks:* `{attributes['remarks']}`\n\n"
             await update.message.reply_text(order_message, parse_mode='MarkdownV2')
@@ -113,6 +113,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text("An error occurred while fetching orders.")
     
     return START_ROUTES
+
 
                 
             
