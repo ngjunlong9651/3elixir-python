@@ -71,7 +71,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         for order in orders:
             if order['attributes']['fulfilmentEnd'] is None:
-                order['attributes']['fulfilmentEnd'] = '2099-12-31T23:59:59.999Z'
+                order['attributes']['fulfilmentEnd'] = order['attributes']['fulfilmentStart']
         
         active_orders = [
             order for order in orders
@@ -91,24 +91,24 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             order_message = f"📋 Orders due today: {today} \n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
-                order_message += f"Order ID: {order['id']}\n"
-                order_message += f"Fulfilment Start: {datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
-                order_message += f"Fulfilment End: {datetime.strptime(attributes['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
-                order_message += f"Order Status: {attributes['order_status']['data']['attributes']['orderStatus']}\n"
-                order_message += f"Customer Name: {attributes['customerName']}\n"
-                order_message += f"Delivery Address: {attributes['customerAddress']}\n"
-                order_message += f"Contact Number: {attributes['customerContact']}\n"
-                order_message += "Products:\n"
+                order_message += f"*Order ID:* {order['id']}\n"
+                # order_message += f"Fulfilment Start: {datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
+                # order_message += f"Fulfilment End: {datetime.strptime(attributes['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
+                order_message += f"*Order Status:* {attributes['order_status']['data']['attributes']['orderStatus']}\n"
+                order_message += f"*Customer Name:* {attributes['customerName']}\n"
+                order_message += f"*Delivery Address:* {attributes['customerAddress']}\n"
+                order_message += f"*Contact Number:* {attributes['customerContact']}\n"
+                order_message += "*Products:*\n"
                 for product in attributes['orderProducts']:
                     order_message += (
-                        f"  - {product['name']} (SKU: {product['sku']}, "
-                        f"Brand: {product['brand']}, "
-                        f"Category: {product['category']}, "
-                        f"Quantity: {product['quantity']}, "
-                        f"Price: ${product['price']})\n"
+                        f"  - *{product['name']}* (SKU: `{product['sku']}`, "
+                        f"Brand: `{product['brand']}`, "
+                        f"Category: `{product['category']}`, "
+                        f"Quantity: `{product['quantity']}`, "
+                        f"Price: `${product['price']}`)\n"
                     )
-                order_message += f"Remarks: {attributes['remarks']}\n\n"
-            await update.message.reply_text(order_message)
+                order_message += f"*Remarks:* `{attributes['remarks']}`\n\n"
+            await update.message.reply_text(order_message, parse_mode='MarkdownV2')
         else:
             await update.message.reply_text("No orders due today.")
     except Exception as e:
