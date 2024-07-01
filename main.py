@@ -60,7 +60,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         for order in orders:
             if order['attributes']['fulfilmentEnd'] is None:
-                order['attributes']['fulfilmentEnd'] = '2099-12-31T23:59:59.999Z'
+                order['attributes']['fulfilmentEnd'] = order['attributes']['fulfilmentStart']
         
         active_orders = [
             order for order in orders
@@ -75,14 +75,11 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ) 
         ]
 
-         
         if due_today_orders:
-            order_message = f"📋 Orders due today: {today} \n\n"
+            order_message = f"*📋 Orders due today: {today}* \n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
                 order_message += f"Order ID: {order['id']}\n"
-                order_message += f"Fulfilment Start: {datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
-                order_message += f"Fulfilment End: {datetime.strptime(attributes['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y-%m-%d')}\n"
                 order_message += f"Order Status: {attributes['order_status']['data']['attributes']['orderStatus']}\n"
                 order_message += f"Customer Name: {attributes['customerName']}\n"
                 order_message += f"Delivery Address: {attributes['customerAddress']}\n"
@@ -97,9 +94,10 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                         f"Price: ${product['price']})\n"
                     )
                 order_message += f"Remarks: {attributes['remarks']}\n\n"
-            await update.message.reply_text(order_message)
+            await update.message.reply_text(order_message, parse_mode=ParseMode.MARKDOWN_V2)
         else:
             await update.message.reply_text("No orders due today.")
+            
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
         await update.message.reply_text("An error occurred while fetching orders.")
