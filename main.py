@@ -76,29 +76,30 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ]
 
         if due_today_orders:
-            # today = today.replace('-', '\\-')
-            print(today)
-            order_message = f"<b>📋 Orders due today: {today}</b> \n\n"
+            order_message = f"<b>📋 Orders due today: </b> {today} \n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
-                order_message += f"Order ID: {order['id']}\n"
-                order_message += f"Order Status: {attributes['order_status']['data']['attributes']['orderStatus']}\n"
-                order_message += f"Customer Name: {attributes['customerName']}\n"
-                order_message += f"Delivery Address: {attributes['customerAddress']}\n"
-                order_message += f"Contact Number: {attributes['customerContact']}\n"
-                order_message += "Products:\n"
+                order_message += f"<b>Order ID:</b> {order['id']}\n"
+                order_message += f"<b>Order Status:</b> {attributes['order_status']['data']['attributes']['orderStatus']}\n"
+                order_message += f"<b>Customer Name:</b> {attributes['customerName']}\n"
+                order_message += f"<b>Delivery Address:</b> {attributes['customerAddress']}\n"
+                order_message += f"<b>Contact Number:</b> {attributes['customerContact']}\n"
+                order_message += "<b>Products:</b>\n"
+                
                 for product in attributes['orderProducts']:
                     order_message += (
-                        f"  - {product['name']} (SKU: {product['sku']}, "
+                        f"  - <b>{product['name']}</b> (SKU: {product['sku']}, "
                         f"Brand: {product['brand']}, "
                         f"Category: {product['category']}, "
                         f"Quantity: {product['quantity']}, "
                         f"Price: ${product['price']})\n"
                     )
-                order_message += f"Remarks: {attributes['remarks']}\n\n"
+                order_message += f"<b>Remarks:</b> {attributes['remarks']}\n\n"
+                
             await update.message.reply_text(order_message, parse_mode=ParseMode.HTML)
         else:
             await update.message.reply_text("No orders due today.")
+    
             
     except Exception as e:
         logger.error(f"Error fetching orders: {e}")
