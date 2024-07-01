@@ -95,7 +95,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                         f"Price: ${product['price']})\n"
                     )
                 order_message += f"<b>Remarks:</b> {attributes['remarks']}\n\n"
-                
+                ## changed to html
             await update.message.reply_text(order_message, parse_mode=ParseMode.HTML)
         else:
             await update.message.reply_text("No orders due today.")
