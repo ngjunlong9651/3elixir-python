@@ -79,12 +79,12 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             order_message = f"<b>📋 Orders due today: </b> {today} \n\n"
             for order in due_today_orders:
                 attributes = order['attributes']
-                order_message += f"<b>Order ID:</b> {order['id']}\n"
-                order_message += f"<b>Order Status:</b> {attributes['order_status']['data']['attributes']['orderStatus']}\n"
-                order_message += f"<b>Customer Name:</b> {attributes['customerName']}\n"
-                order_message += f"<b>Delivery Address:</b> {attributes['customerAddress']}\n"
-                order_message += f"<b>Contact Number:</b> {attributes['customerContact']}\n"
-                order_message += "<b>Products:</b>\n"
+                order_message += f"<b>📋📋 Order ID:</b> {order['id']}\n"
+                order_message += f"<b> ⌛⌛ Order Status:</b> {attributes['order_status']['data']['attributes']['orderStatus']}\n"
+                order_message += f"<b> 👱‍♂️👩 Customer Name:</b> {attributes['customerName']}\n"
+                order_message += f"<b> 📍📍 Delivery Address:</b> {attributes['customerAddress']}\n"
+                order_message += f"<b> 📞📞 Contact Number:</b> {attributes['customerContact']}\n"
+                order_message += "<b> 📦📦 Products:</b>\n"
                 
                 for product in attributes['orderProducts']:
                     order_message += (
