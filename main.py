@@ -2,6 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppI
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler
 from telegram.constants import ParseMode
 from datetime import datetime
+import pytz
 import requests
 import os
 import logging
@@ -44,65 +45,97 @@ async def catalog(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
-        today = datetime.now().date()
+        logger.info("Fetching orders due today.")
+        
+        # Define Singapore timezone
+        singapore_timezone = pytz.timezone('Asia/Singapore')
+        today = datetime.now(singapore_timezone).date()
+        logger.info(f"Current Date time (Singapore): {today}")
+        
         prod_url = os.environ.get("PROD_URL")
         if prod_url is None:
             logger.error("Prod URL is not set in the environment variables.")
             await update.message.reply_text("PROD_URL is not set in the environment variables.")
             return
         
-        response = requests.get(f"{prod_url}/api/orders/?populate=*", headers={
-            'Authorization': f"Bearer {os.getenv('API_TOKEN')}"
-        })
-        response.raise_for_status()
-        orders = response.json().get('data', [])
-        print(orders)
+        # Initialize variables for pagination
+        all_orders = []
+        start = 0
+        limit = 100
+
+        # Fetch all pages of orders
+        while True:
+            response = requests.get(f"{prod_url}/api/orders/?populate=*&pagination[limit]={limit}&pagination[start]={start}", headers={
+                'Authorization': f"Bearer {os.getenv('API_TOKEN')}"
+            })
+            response.raise_for_status()
+            data = response.json().get('data', [])
+            if not data:
+                break
+            all_orders.extend(data)
+            start += limit
+
+        logger.info(f"Fetched a total of {len(all_orders)} orders from API")
+        if not all_orders:
+            await update.message.reply_text("No orders found.")
+            return START_ROUTES
         
-        for order in orders:
+        for order in all_orders:
             if order['attributes']['fulfilmentEnd'] is None:
                 order['attributes']['fulfilmentEnd'] = order['attributes']['fulfilmentStart']
         
         active_orders = [
-            order for order in orders
-            if order['attributes']['order_status']['data']['attributes']['orderStatus'] not in ['Completed' , 'Cancelled']
+            order for order in all_orders
+            if order['attributes']['order_status']['data']['attributes']['orderStatus'] not in ['Completed', 'Cancelled', 'Out For Delivery']
         ]
-        
+        logger.info(f"Filtered {len(active_orders)} active orders")
+
         due_today_orders = [
             order for order in active_orders
             if (
-                datetime.strptime(order['attributes']['fulfilmentStart'], "%Y-%m-%dT%H:%M:%S.%fZ").date() <= today <= 
-                (datetime.strptime(order['attributes']['fulfilmentEnd'], "%Y-%m-%dT%H:%M:%S.%fZ").date())
+                datetime.strptime(order['attributes']['fulfilmentStart'], "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(singapore_timezone).date() <= today <= 
+                (datetime.strptime(order['attributes']['fulfilmentEnd'], "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(singapore_timezone).date())
             ) 
         ]
+        
+        logger.info(f"Found {len(due_today_orders)} orders due today")
 
         if due_today_orders:
-            order_message = f"<b>📋 Orders due today: </b> {today} \n\n"
+            total_orders = len(due_today_orders)
+            order_message = f"Orders Due Today:  {today.strftime('%d-%m-%Y')}. {today.strftime('%A')}\n"
+            order_message += f"Total Orders: {total_orders}\n"
+            order_message += "--------------------------------------\n"
+            
             for order in due_today_orders:
                 attributes = order['attributes']
-                order_message += f"<b>📋📋 Order ID:</b> {order['id']}\n"
-                order_message += f"<b> ⌛⌛ Order Status:</b> {attributes['order_status']['data']['attributes']['orderStatus']}\n"
-                order_message += f"<b> 👱‍♂️👩 Customer Name:</b> {attributes['customerName']}\n"
-                order_message += f"<b> 📍📍 Delivery Address:</b> {attributes['customerAddress']}\n"
-                order_message += f"<b> 📞📞 Contact Number:</b> {attributes['customerContact']}\n"
-                order_message += "<b> 📦📦 Products:</b>\n"
-                
+                order_message += f"<b> 📋 Order ID:</b> {order['id']}\n"
+                order_message += f"<b> ⌛ Order Status:</b> {attributes['order_status']['data']['attributes']['orderStatus']}\n"
+                order_message += f"<b> 💼 Customer Name: {attributes['customerName']}</b>\n"
+                order_message += f"<b> 👤 Attn: {attributes['attention']}</b>\n"
+                order_message += f"<b> 📍 Delivery Address:</b> {attributes['customerAddress']}\n"
+                order_message += f"<b> ⏰ Delivery Time:</b> {datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d-%m-%Y %I:%M %p')}\n"
+                order_message += f"<b> 📞 Contact Number:</b> {attributes['customerContact']}\n"
+                order_message += "<b> 📦 Products:</b>\n"
                 for product in attributes['orderProducts']:
                     order_message += (
-                        f"  - <b>{product['name']}</b> (SKU: {product['sku']}, "
-                        f"Brand: {product['brand']}, "
-                        f"Category: {product['category']}, "
-                        f"Quantity: {product['quantity']}, "
-                        f"Price: ${product['price']})\n"
+                        f"  {product['quantity']} x {product['name']} "
+                        f"@ ${product['price']}/Btl\n"
                     )
-                order_message += f"<b>Remarks:</b> {attributes['remarks']}\n\n"
-                ## changed to html
+                ## Optional Remarks:
+                if attributes.get('remarks'):
+                    order_message += f"<b>Remarks:</b> {attributes['remarks']}\n\n"
+                    
+                ## Divider between the orders:
+                order_message += "--------------------------------------\n"
+            
             await update.message.reply_text(order_message, parse_mode=ParseMode.HTML)
+            logger.info("Sent reminder with due today orders.")
         else:
+            logger.info("No orders due today")
             await update.message.reply_text("No orders due today.")
     
-            
     except Exception as e:
-        logger.error(f"Error fetching orders: {e}")
+        logger.error(f"Error fetching orders: {str(e)}")
         await update.message.reply_text("An error occurred while fetching orders.")
     
     return START_ROUTES
@@ -141,14 +174,14 @@ def order_management_keyboard() -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(
                 "1️⃣ View orders",
-                web_app=WebAppInfo(url="https://3elixir-tma-web.vercel.app/orders"),
+                web_app=WebAppInfo(url="https://3elixir-order-management-tma.vercel.app/orders"),
             )
         ],
         [
             InlineKeyboardButton(
                 "2️⃣ Create order",
                 web_app=WebAppInfo(
-                    url="https://3elixir-tma-web.vercel.app/orders/create-step1"
+                    url="https://3elixir-order-management-tma.vercel.app/orders/create-step1"
                 ),
             )
         ],
@@ -165,14 +198,14 @@ def catalog_management_keyboard() -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(
                 "1️⃣ View catalogs",
-                web_app=WebAppInfo(url="https://3elixir-tma-web.vercel.app/products"),
+                web_app=WebAppInfo(url="https://3elixir-order-management-tma.vercel.app/products"),
             )
         ],
         [
             InlineKeyboardButton(
                 "2️⃣ Add a new product",
                 web_app=WebAppInfo(
-                    url="https://3elixir-tma-web.vercel.app/products/create"
+                    url="https://3elixir-order-management-tma.vercel.app/products/create"
                 ),
             )
         ],
