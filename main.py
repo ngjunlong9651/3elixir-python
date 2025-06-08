@@ -43,6 +43,7 @@ async def catalog(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     return CATALOG
 
+
 async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         logger.info("Fetching orders due today.")
@@ -107,13 +108,28 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             order_message += "--------------------------------------\n"
             
             for order in due_today_orders:
-                attributes = order['attributes']
+                
+                ## Update on 8th Jun @JL giving range of start & end time
+                # Parse both start and end times
+                start_time = datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').astimezone(singapore_timezone)
+                end_time = datetime.strptime(attributes['fulfilmentEnd'], '%Y-%m-%dT%H:%M:%S.%fZ').astimezone(singapore_timezone)
+                
+                # Format delivery time as range
+                if start_time == end_time:
+                    # Same time - show single time
+                    time_display = start_time.strftime('%d-%m-%Y %I:%M %p')
+                elif start_time.date() == end_time.date():
+                    # Same day - show time range
+                    time_display = f"{start_time.strftime('%d-%m-%Y %I:%M %p')} - {end_time.strftime('%I:%M %p')}"
+                else:
+                    # Different days - show full datetime for both
+                    time_display = f"{start_time.strftime('%d-%m-%Y %I:%M %p')} - {end_time.strftime('%d-%m-%Y %I:%M %p')}"                attributes = order['attributes']
                 order_message += f"<b> 📋 Order ID:</b> {order['id']}\n"
                 order_message += f"<b> ⌛ Order Status:</b> {attributes['order_status']['data']['attributes']['orderStatus']}\n"
                 order_message += f"<b> 💼 Customer Name: {attributes['customerName']}</b>\n"
                 order_message += f"<b> 👤 Attn: {attributes['attention']}</b>\n"
                 order_message += f"<b> 📍 Delivery Address:</b> {attributes['customerAddress']}\n"
-                order_message += f"<b> ⏰ Delivery Time:</b> {datetime.strptime(attributes['fulfilmentStart'], '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d-%m-%Y %I:%M %p')}\n"
+                order_message += f"<b> ⏰ Delivery Time:</b> {time_display}\n"
                 order_message += f"<b> 📞 Contact Number:</b> {attributes['customerContact']}\n"
                 order_message += "<b> 📦 Products:</b>\n"
                 for product in attributes['orderProducts']:
