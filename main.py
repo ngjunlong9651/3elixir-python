@@ -117,7 +117,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 # Format delivery time as range
                 if start_time == end_time:
                     # Same time - show single time
-                    time_display = start_time.strftime('%d-%m-%Y %I:%M %p')
+                    time_display = start_time.strftime('%d-%m-%Y %I:%M %p') ## Here
                 elif start_time.date() == end_time.date():
                     # Same day - show time range
                     time_display = f"{start_time.strftime('%d-%m-%Y %I:%M %p')} - {end_time.strftime('%I:%M %p')}"
@@ -129,7 +129,7 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 order_message += f"<b> 💼 Customer Name: {attributes['customerName']}</b>\n"
                 order_message += f"<b> 👤 Attn: {attributes['attention']}</b>\n"
                 order_message += f"<b> 📍 Delivery Address:</b> {attributes['customerAddress']}\n"
-                order_message += f"<b> ⏰ Delivery Time:</b> {time_display}\n"
+                order_message += f"<b> ⏰ Delivery Time:</b> {start_time} - {end_time}\n"
                 order_message += f"<b> 📞 Contact Number:</b> {attributes['customerContact']}\n"
                 order_message += "<b> 📦 Products:</b>\n"
                 for product in attributes['orderProducts']:
@@ -264,7 +264,7 @@ def main() -> None:
         logger.error("No TELEGRAM_BOT_TOKEN set in environment variables.")
         return
 
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).concurrent_updates(True).build()
 
     # Handlers go here
     conv_handler = ConversationHandler(
